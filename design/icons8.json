@@ -1,0 +1,27 @@
+{
+  "version": 3,
+  "icons": {
+    "format": "svg",
+    "directory": "assets/icons",
+    "themes": "The same file is used in dark and light mode.",
+    "items": {
+      "overview": "assets/icons/overview.svg",
+      "solar": "assets/icons/solar.svg",
+      "electricity": "assets/icons/electricity.svg",
+      "charging": "assets/icons/charging.svg",
+      "inspection": "assets/icons/inspection.svg",
+      "sun": "assets/icons/sun.svg",
+      "battery": "assets/icons/battery.svg",
+      "alarm": "assets/icons/alarm.svg",
+      "telemetry": "assets/icons/telemetry.svg",
+      "graph": "assets/icons/graph.svg",
+      "forecast": "assets/icons/forecast.svg",
+      "optimizer": "assets/icons/optimizer.svg",
+      "scenario": "assets/icons/scenario.svg",
+      "compare": "assets/icons/compare.svg",
+      "validation": "assets/icons/validation.svg",
+      "architecture": "assets/icons/architecture.svg",
+      "moon": "assets/icons/moon.svg"
+    }
+  }
+}
