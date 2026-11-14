@@ -1,0 +1,26 @@
+{
+  "site_id": "SITE-01",
+  "model_type": "simulated operational crop",
+  "footprint_m": {"x": 32, "y": 22},
+  "coordinate_system": "Blender meters; x across charging bays, y toward the service apron, z up",
+  "simulation_clock": "12:40:08 GST (UTC+4)",
+  "source_model": "ev-microgrid-site.blend",
+  "views": {
+    "overview": "site-overview.png",
+    "pv": "pv-canopy-detail.png",
+    "charger_c04": "charger-c04-detail.png",
+    "battery": "battery-bess01-detail.png",
+    "transformer": "transformer-tx01-detail.png"
+  },
+  "assets": [
+    {"id":"PV-01","kind":"solar array","modeled_module_count":30,"operational_capacity_kwp":180,"modeled_scope":"representative canopy segment; remaining PV modules are outside the operational crop","current_kw":96,"state":"generating","figcraft_page":6},
+    {"id":"C01","kind":"DC charger","position_m":[-8.3,-1.92,0],"state":"charging","current_kw":62,"temperature_c":41,"session":"EV-0214","figcraft_page":4},
+    {"id":"C02","kind":"DC charger","position_m":[-4.15,-1.92,0],"state":"charging","current_kw":74,"temperature_c":44,"session":"EV-0215","figcraft_page":4},
+    {"id":"C03","kind":"DC charger","position_m":[0,-1.92,0],"state":"charging","current_kw":108,"temperature_c":40,"session":"EV-0217","figcraft_page":4},
+    {"id":"C04","kind":"DC charger","position_m":[4.15,-1.92,0],"state":"warning / charging","current_kw":58,"temperature_c":72,"session":"EV-0218","alarm":"ALM-104","figcraft_page":5},
+    {"id":"C05","kind":"DC charger","position_m":[8.3,-1.92,0],"state":"available","current_kw":0,"temperature_c":36,"session":null,"figcraft_page":4},
+    {"id":"BESS-01","kind":"battery enclosure","position_m":[12.85,2.0,0],"capacity_kwh":500,"state_of_charge_percent":64,"current_charge_kw":42,"figcraft_page":7},
+    {"id":"TX-01","kind":"pad-mounted transformer","position_m":[-13.1,2.25,0],"rating_kva":400,"loading_percent":78,"figcraft_page":8},
+    {"id":"GRID-01","kind":"grid switchgear","position_m":[-13.1,5.75,0],"import_kw":248,"cap_kw":320,"figcraft_page":8}
+  ]
+}
