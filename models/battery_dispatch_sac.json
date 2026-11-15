@@ -1,0 +1,19 @@
+{
+  "algorithm": "soft_actor_critic",
+  "device": "cuda",
+  "observation": [
+    "state_of_charge",
+    "net_load_over_inverter",
+    "hour_sin",
+    "hour_cos",
+    "energy_above_reserve",
+    "episode_remaining"
+  ],
+  "action": "battery_power_fraction",
+  "provenance": {
+    "source_sha256": "3aec010bc9b592652ed4528c2712124630eef3a31f31e3189c04f227cc7b1428",
+    "training_before": "2026-05-31 00:00",
+    "timesteps": 40000,
+    "seed": 42
+  }
+}
