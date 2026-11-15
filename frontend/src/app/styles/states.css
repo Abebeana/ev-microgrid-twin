@@ -1,0 +1,57 @@
+.readiness-list > div {
+  display: grid;
+  grid-template-columns: 12px 70px 1fr;
+  align-items: start;
+  gap: 5px;
+  border-top: 1px solid var(--border);
+  padding: 10px 0;
+}
+.readiness-list strong {
+  text-transform: capitalize;
+}
+.readiness-list small {
+  color: var(--text-muted);
+  line-height: 1.4;
+}
+.readiness-list .muted-dot {
+  background: var(--faint);
+}
+.footer {
+  border-top: 1px solid var(--border);
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 13px 30px;
+  color: var(--faint);
+  font-size: 13px;
+}
+.load-error,
+.loading-state {
+  padding: 30px;
+  background: var(--panel);
+  border: 1px solid var(--border);
+  color: var(--text-muted);
+}
+.load-error strong {
+  color: var(--text);
+}
+.loading-state {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.error-text {
+  color: var(--error);
+  font-size: 15px;
+  line-height: 1.4;
+}
+.success-text {
+  color: var(--green);
+  font-size: 14px;
+}
+.icon-button {
+  border: 0;
+  background: transparent;
+  color: var(--text-muted);
+  padding: 4px;
+}

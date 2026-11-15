@@ -1,0 +1,26 @@
+@import 'tailwindcss';
+@import '@fontsource-variable/geist';
+@custom-variant dark (&:is([data-theme="dark"] *));
+@theme inline {
+  --color-background: var(--bg);
+  --color-foreground: var(--text);
+  --color-card: var(--panel);
+  --color-card-foreground: var(--text);
+  --color-popover: var(--panel);
+  --color-popover-foreground: var(--text);
+  --color-primary: var(--accent);
+  --color-primary-foreground: var(--bg);
+  --color-secondary: var(--control);
+  --color-secondary-foreground: var(--text);
+  --color-muted: var(--panel-2);
+  --color-muted-foreground: var(--text-muted);
+  --color-accent: var(--accent-bg);
+  --color-accent-foreground: var(--accent-text);
+  --color-destructive: var(--error);
+  --color-border: var(--border);
+  --color-input: var(--border);
+  --color-ring: var(--accent);
+  --radius-sm: 0;
+  --radius-md: 0;
+  --radius-lg: 0;
+}

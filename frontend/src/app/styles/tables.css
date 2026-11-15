@@ -1,0 +1,84 @@
+.rl-method-detail {
+  display: block;
+  color: var(--text-muted);
+  font-weight: 400;
+  margin-top: 3px;
+  line-height: 1.35;
+}
+.rl-day-selector {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--text-muted);
+  font-size: 14px;
+  white-space: nowrap;
+}
+.rl-day-selector select {
+  background: var(--input);
+  color: var(--text);
+  border: 1px solid var(--border);
+  min-height: 32px;
+  padding: 4px 8px;
+}
+.rl-replay-table {
+  max-height: 280px;
+  overflow: auto;
+  margin-top: 10px;
+}
+.rl-replay-table th,
+.rl-replay-table td {
+  white-space: nowrap;
+}
+.chart-data {
+  border-top: 1px solid var(--border);
+  margin-top: 8px;
+  padding-top: 8px;
+}
+.chart-data summary {
+  color: var(--text-muted);
+  cursor: pointer;
+  font-size: 15px;
+  width: max-content;
+  padding: 7px 0;
+}
+.chart-data .table-scroll {
+  max-height: 240px;
+  margin-top: 8px;
+  overflow: auto;
+}
+table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 15px;
+  min-width: 540px;
+}
+thead {
+  color: var(--text-muted);
+  background: var(--panel-2);
+}
+th,
+td {
+  text-align: left;
+  padding: 9px 10px;
+  border-bottom: 1px solid var(--border);
+  white-space: nowrap;
+}
+th {
+  font-weight: 600;
+}
+tbody tr:hover {
+  background: var(--panel-2);
+}
+tbody td {
+  color: var(--text-muted);
+}
+.status {
+  color: var(--green);
+  font-weight: 650;
+}
+.status.warn {
+  color: var(--warn);
+}
+.subtle {
+  color: var(--faint);
+}

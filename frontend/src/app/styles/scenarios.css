@@ -1,0 +1,119 @@
+.ack-form {
+  border-top: 1px solid var(--border);
+  margin-top: 18px;
+  padding-top: 15px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 8px;
+}
+.ack-form label {
+  font-weight: 650;
+}
+.ack-form textarea {
+  width: 100%;
+  min-height: 86px;
+  resize: vertical;
+}
+.scenario-form {
+  display: grid;
+  gap: 0;
+}
+.form-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(160px, 220px);
+  align-items: center;
+  gap: 8px 18px;
+  padding: 14px 0;
+  border-top: 1px solid var(--border);
+}
+.form-row label {
+  font-size: 14px;
+  font-weight: 580;
+}
+.form-row label strong {
+  float: right;
+}
+.form-row small {
+  grid-column: 1 / -1;
+  color: var(--faint);
+}
+.form-row input[type='range'] {
+  accent-color: var(--accent);
+  padding: 0;
+  border: 0;
+  width: 100%;
+}
+.form-actions,
+.result-actions {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  align-items: center;
+  padding-top: 12px;
+}
+.result-actions {
+  border-top: 1px solid var(--border);
+  margin-top: 20px;
+}
+.hash-line {
+  color: var(--text-muted);
+  font-size: 13px;
+  margin-top: 15px;
+  overflow-wrap: anywhere;
+}
+.hash-line code {
+  color: var(--text);
+  margin-left: 7px;
+  font-size: 13px;
+  overflow-wrap: anywhere;
+}
+.provenance {
+  max-height: 240px;
+  overflow: auto;
+  background: var(--panel-2);
+  color: var(--text-muted);
+  padding: 12px;
+  font-size: 13px;
+}
+.compare-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  margin: 5px 0 20px;
+}
+.compare-grid > div {
+  border: 1px solid var(--border);
+  background: var(--panel-2);
+  padding: 15px;
+  display: flex;
+  flex-direction: column;
+}
+.compare-grid strong {
+  font-size: 29px;
+  margin-bottom: 5px;
+}
+.compare-grid small,
+.compare-grid code {
+  color: var(--text-muted);
+  margin-top: 6px;
+}
+.saved-list > div {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  border-bottom: 1px solid var(--border);
+  padding: 10px 0;
+}
+.saved-list span,
+.saved-list small {
+  color: var(--text-muted);
+}
+.saved-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px;
+}
+.saved-actions .secondary-button {
+  margin-top: 4px;
+}

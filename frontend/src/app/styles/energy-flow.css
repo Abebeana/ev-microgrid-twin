@@ -1,0 +1,132 @@
+.energy-flow {
+  min-height: 216px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0;
+  padding: 10px 0;
+  overflow-x: auto;
+}
+.flow-column {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+.flow-node {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 13px;
+  text-align: left;
+  min-width: 150px;
+  min-height: 64px;
+  padding: 10px 12px;
+  border: 1px solid var(--border);
+  background: var(--panel-2);
+  color: var(--text-muted);
+}
+button.flow-node:hover {
+  border-color: var(--accent);
+  color: var(--text);
+}
+.flow-node > span {
+  font-size: 14px;
+}
+.flow-node strong {
+  display: block;
+  font-size: 18px;
+  font-weight: 680;
+  color: var(--text);
+  margin-top: 4px;
+  white-space: nowrap;
+}
+.flow-node small {
+  display: block;
+  margin-top: 3px;
+  color: var(--faint);
+}
+.flow-node svg {
+  color: var(--accent);
+  flex: 0 0 auto;
+}
+.flow-line {
+  min-width: 38px;
+  height: 1px;
+  background: var(--accent);
+}
+.bus-node {
+  min-width: 180px;
+  min-height: 80px;
+  border-color: var(--accent);
+}
+.bus-node strong {
+  font-size: 15px;
+  white-space: normal;
+}
+.attention-row {
+  display: grid;
+  grid-template-columns: 54px minmax(0, 1fr);
+  gap: 8px;
+  width: 100%;
+  text-align: left;
+  border: 1px solid var(--border);
+  background: var(--panel-2);
+  color: var(--text);
+  padding: 9px;
+  margin-bottom: 7px;
+}
+.attention-row > span:nth-child(2) {
+  min-width: 0;
+}
+.attention-row strong,
+.attention-row small {
+  display: block;
+}
+.attention-row small {
+  color: var(--text-muted);
+  margin-top: 3px;
+  line-height: 1.35;
+}
+.attention-row > small {
+  grid-column: 2;
+  font-size: 12px;
+  margin: 0;
+}
+.severity {
+  align-self: start;
+  background: var(--warn-bg);
+  color: var(--warn);
+  text-transform: uppercase;
+  font-size: 12px;
+  font-weight: 750;
+  padding: 4px;
+  text-align: center;
+}
+.unavailable {
+  min-height: 170px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: center;
+}
+.unavailable-mark {
+  color: var(--accent);
+  display: block;
+  width: 30px;
+  height: 30px;
+  border: 1px solid var(--border);
+  border-radius: 50%;
+  text-align: center;
+  font-size: 23px;
+  margin-bottom: 12px;
+}
+.unavailable h3 {
+  font-size: 18px;
+  margin-bottom: 5px;
+}
+.unavailable p {
+  color: var(--text-muted);
+  font-size: 14px;
+  line-height: 1.5;
+  max-width: 480px;
+}

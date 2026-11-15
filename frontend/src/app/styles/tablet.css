@@ -1,0 +1,67 @@
+@media (max-width: 1200px) {
+  .topbar {
+    padding-inline: 20px;
+  }
+  main {
+    padding-inline: 20px;
+  }
+  .content-grid {
+    grid-template-columns: minmax(0, 1.5fr) minmax(240px, 1fr);
+  }
+  .flow-node {
+    min-width: 130px;
+  }
+  .flow-line {
+    min-width: 18px;
+  }
+}
+@media (max-width: 900px) {
+  .shell {
+    grid-template-columns: 1fr;
+  }
+  .sidebar {
+    position: fixed;
+    inset: 0 auto 0 0;
+    width: 268px;
+    transform: translateX(-100%);
+    visibility: hidden;
+    transition: transform 0.2s ease;
+    box-shadow: 20px 0 40px #0005;
+  }
+  .sidebar.open {
+    transform: translateX(0);
+    visibility: visible;
+  }
+  .nav-scrim {
+    display: block;
+    position: fixed;
+    inset: 0;
+    z-index: 10;
+    background: #0008;
+    border: 0;
+  }
+  .mobile-menu,
+  .mobile-close {
+    display: inline-grid;
+    place-items: center;
+    width: 40px;
+    height: 40px;
+    border: 0;
+    background: transparent;
+    color: var(--text);
+    padding: 5px;
+  }
+  .mobile-close {
+    margin-left: auto;
+  }
+  .topbar {
+    justify-content: flex-start;
+    gap: 12px;
+  }
+  .topbar-tools {
+    margin-left: auto;
+  }
+  .stream-hero {
+    grid-template-columns: 1fr;
+  }
+}

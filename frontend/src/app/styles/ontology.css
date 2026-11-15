@@ -1,0 +1,109 @@
+.graph-summary {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-bottom: 13px;
+}
+.graph-summary > div {
+  min-width: 130px;
+  padding: 11px 15px;
+  background: var(--panel-2);
+  border: 1px solid var(--border);
+  display: grid;
+  gap: 3px;
+}
+.graph-summary strong {
+  font-size: 24px;
+  font-variant-numeric: tabular-nums;
+}
+.graph-summary span {
+  color: var(--text-muted);
+  font-size: 14px;
+}
+.graph-kind-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px;
+  margin-bottom: 14px;
+}
+.graph-kind-list span {
+  border: 1px solid var(--border);
+  padding: 5px 8px;
+  color: var(--text-muted);
+  text-transform: capitalize;
+  font-size: 14px;
+}
+.graph-kind-list b {
+  color: var(--text);
+  padding-left: 4px;
+}
+.ontology-types {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 8px;
+}
+.ontology-types > div {
+  padding: 10px 12px;
+  border: 1px solid var(--border);
+  background: var(--panel-2);
+  display: grid;
+  gap: 5px;
+}
+.ontology-types strong {
+  font-size: 14px;
+}
+.ontology-types span {
+  color: var(--text-muted);
+  font-size: 14px;
+  line-height: 1.35;
+}
+.graph-note {
+  margin: 0 0 12px;
+  color: var(--text-muted);
+  font-size: 14px;
+  line-height: 1.45;
+}
+.graph-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 14px;
+  margin-bottom: 12px;
+  color: var(--text-muted);
+  font-size: 13px;
+  text-transform: capitalize;
+}
+.graph-legend span {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+.graph-legend i {
+  width: 22px;
+  border-top-width: 2px;
+}
+.graph-path {
+  display: inline-flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  align-items: center;
+}
+.graph-path span {
+  display: inline-flex;
+  gap: 4px;
+  align-items: center;
+}
+.graph-path code {
+  font-size: 12px;
+}
+.graph-query {
+  display: grid;
+  gap: 4px;
+  margin-top: 12px;
+}
+.graph-query pre {
+  margin: 0;
+  white-space: pre-wrap;
+  color: var(--text-muted);
+  font-size: 12px;
+  line-height: 1.45;
+}

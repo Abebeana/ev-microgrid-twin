@@ -1,0 +1,131 @@
+@media (max-width: 720px) {
+  .topbar {
+    min-height: 62px;
+    padding: 10px 14px;
+  }
+  h1 {
+    font-size: 15px;
+  }
+  .topbar-tools {
+    gap: 5px;
+  }
+  .tool-button {
+    padding: 0 7px;
+  }
+  .tool-button span,
+  .mode-badge {
+    display: none;
+  }
+  main {
+    padding: 18px 14px;
+  }
+  .topbar {
+    flex-wrap: wrap;
+  }
+  .replay-control {
+    order: 3;
+    width: 100%;
+  }
+  .replay-control input {
+    flex: 1;
+    width: auto;
+  }
+  .metrics-strip {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    padding: 0;
+  }
+  .metric {
+    padding: 14px;
+    border-bottom: 1px solid var(--border);
+  }
+  .metric:nth-child(even) {
+    border-right: 0;
+  }
+  .metric:nth-last-child(-n + 2) {
+    border-bottom: 0;
+  }
+  .content-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .content-grid > .wide,
+  .content-grid > .full {
+    grid-column: 1;
+  }
+  .energy-flow {
+    flex-direction: column;
+    align-items: stretch;
+    justify-content: center;
+    overflow: visible;
+    gap: 0;
+  }
+  .flow-column {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 8px;
+  }
+  .flow-node {
+    min-width: 0;
+    width: 100%;
+  }
+  .flow-node strong {
+    white-space: normal;
+  }
+  .flow-line {
+    min-width: 1px;
+    width: 1px;
+    height: 18px;
+    align-self: center;
+  }
+  .wallbox-links {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .inspection-hero {
+    grid-template-columns: 1fr;
+  }
+  .inspection-hero > div {
+    border-right: 0;
+    border-bottom: 1px solid var(--border);
+    padding-bottom: 10px;
+  }
+  .inspection-hero > div:last-child {
+    border-bottom: 0;
+  }
+  .unavailable-grid {
+    grid-template-columns: 1fr;
+  }
+  .unavailable-grid .unavailable {
+    border-right: 0;
+    border-bottom: 1px solid var(--border);
+  }
+  .pipeline {
+    justify-content: flex-start;
+  }
+  .form-row {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .compare-grid {
+    grid-template-columns: 1fr;
+  }
+  .compare-grid code {
+    overflow-wrap: anywhere;
+  }
+  .stream-hero {
+    padding: 18px;
+  }
+  .stream-route {
+    grid-template-columns: 1fr;
+  }
+  .stream-route > div {
+    min-height: 64px;
+    flex-direction: row;
+    align-items: center;
+  }
+  .stream-route > svg {
+    justify-self: center;
+    transform: rotate(90deg);
+  }
+  .footer {
+    padding: 12px 14px;
+    flex-wrap: wrap;
+  }
+}

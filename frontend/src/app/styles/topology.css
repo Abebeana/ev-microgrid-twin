@@ -1,0 +1,105 @@
+.island-banner {
+  display: flex;
+  gap: 14px;
+  align-items: flex-start;
+  background: var(--accent-bg);
+  border-left: 3px solid var(--accent);
+  padding: 16px;
+  margin-bottom: 14px;
+}
+.island-banner svg {
+  color: var(--accent);
+  flex: 0 0 auto;
+}
+.island-banner strong {
+  font-size: 18px;
+}
+.island-banner p {
+  margin: 7px 0 0;
+  color: var(--text-muted);
+  font-size: 14px;
+  line-height: 1.55;
+}
+.unavailable-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 15px;
+}
+.unavailable-grid .unavailable {
+  min-height: 135px;
+  border-right: 1px solid var(--border);
+  padding-right: 12px;
+}
+.unavailable-grid .unavailable:last-child {
+  border: 0;
+}
+.pipeline {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 16px;
+  padding: 25px 0 32px;
+  overflow-x: auto;
+}
+.pipeline > div {
+  min-width: 150px;
+  min-height: 95px;
+  border: 1px solid var(--border);
+  background: var(--panel-2);
+  padding: 13px;
+  display: flex;
+  flex-direction: column;
+}
+.pipeline svg {
+  color: var(--accent);
+}
+.pipeline strong {
+  margin-top: 10px;
+  font-size: 14px;
+}
+.pipeline small {
+  margin-top: 3px;
+  color: var(--text-muted);
+}
+.graph-canvas {
+  height: 520px;
+  background: var(--panel-2);
+}
+.graph-node {
+  display: flex;
+  flex-direction: column;
+  text-align: left;
+  gap: 6px;
+  font-size: 14px;
+}
+.graph-node span {
+  color: var(--text-muted);
+  font-size: 13px;
+}
+.graph-asset-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+  gap: 6px;
+  margin-top: 10px;
+}
+.graph-asset-list button,
+.graph-asset-list > div {
+  text-align: left;
+  background: var(--panel-2);
+  color: var(--text);
+  border: 1px solid var(--border);
+  padding: 8px;
+}
+.graph-asset-list button:hover {
+  border-color: var(--accent);
+}
+.graph-asset-list span {
+  display: block;
+  color: var(--text-muted);
+  margin-top: 4px;
+}
+.react-flow__controls button {
+  color: var(--text) !important;
+  background: var(--panel) !important;
+  border-color: var(--border) !important;
+}

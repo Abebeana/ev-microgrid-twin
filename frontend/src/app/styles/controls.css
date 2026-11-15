@@ -1,0 +1,77 @@
+.action-button,
+.secondary-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  min-height: 36px;
+  padding: 8px 12px;
+  border: 1px solid var(--accent);
+  color: var(--accent-text);
+  background: var(--accent-bg);
+  font-size: 15px;
+  font-weight: 650;
+  margin-top: 8px;
+}
+.action-button:hover,
+.secondary-button:hover {
+  filter: brightness(1.12);
+}
+.secondary-button {
+  background: var(--control);
+  color: var(--text);
+  border-color: var(--border);
+}
+.secondary-button[aria-pressed='true'] {
+  border-color: var(--accent);
+  background: var(--accent-bg);
+}
+.detail-list {
+  margin: 0;
+}
+.detail-list > div {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1.1fr);
+  gap: 10px;
+  padding: 10px 0;
+  border-top: 1px solid var(--border);
+  align-items: start;
+}
+.detail-list dt {
+  color: var(--text-muted);
+  font-size: 14px;
+}
+.detail-list dd {
+  color: var(--text);
+  margin: 0;
+  font-size: 15px;
+  font-weight: 600;
+  overflow-wrap: anywhere;
+}
+.detail-list .hash {
+  font-size: 12px;
+}
+.segmented {
+  display: flex;
+  border: 1px solid var(--border);
+}
+.segmented button {
+  border: 0;
+  border-right: 1px solid var(--border);
+  color: var(--text-muted);
+  background: var(--control);
+  padding: 5px 8px;
+  font-size: 13px;
+  min-width: 35px;
+}
+.segmented button:last-child {
+  border-right: 0;
+}
+.segmented button[aria-pressed='true'] {
+  color: var(--text);
+  background: var(--accent-bg);
+}
+.table-scroll {
+  overflow-x: auto;
+  max-width: 100%;
+}
