@@ -1,0 +1,932 @@
+{
+  "uid": "sofie-overview",
+  "title": "SOFIE \u00b7 Digital Twin Control Room",
+  "description": "Historical solar EV microgrid behavior, topology, and evidence.",
+  "schemaVersion": 41,
+  "version": 0,
+  "editable": true,
+  "timezone": "Europe/Berlin",
+  "graphTooltip": 1,
+  "tags": [
+    "SOFIE",
+    "digital-twin",
+    "historical-replay",
+    "EV-microgrid"
+  ],
+  "time": {
+    "from": "2026-06-29T10:00:00Z",
+    "to": "2026-06-29T16:00:00Z"
+  },
+  "refresh": "",
+  "links": [
+    {
+      "type": "link",
+      "title": "Charging fleet",
+      "url": "/d/sofie-fleet",
+      "includeVars": true,
+      "keepTime": true
+    },
+    {
+      "type": "link",
+      "title": "Data trust & diagnostics",
+      "url": "/d/sofie-diagnostics",
+      "includeVars": true,
+      "keepTime": true
+    }
+  ],
+  "templating": {
+    "list": []
+  },
+  "panels": [
+    {
+      "id": 1,
+      "title": "",
+      "type": "text",
+      "gridPos": {
+        "x": 0,
+        "y": 0,
+        "w": 24,
+        "h": 4
+      },
+      "description": "",
+      "options": {
+        "mode": "markdown",
+        "content": "## SOFIE / DIGITAL TWIN CONTROL ROOM\n**Historical replay \u00b7 Europe/Berlin** &nbsp; | &nbsp; Solar EV microgrid \u00b7 8 wallboxes \u00b7 38.4 kWh battery &nbsp; | &nbsp; Select a time window to inspect measured behavior."
+      }
+    },
+    {
+      "id": 2,
+      "title": "Site topology \u00b7 select a wallbox",
+      "type": "volkovlabs-echarts-panel",
+      "gridPos": {
+        "x": 0,
+        "y": 4,
+        "w": 15,
+        "h": 16
+      },
+      "description": "Configured site relationships. Node values come from the last measurement within the selected time range. Lines do not indicate measured power flow.",
+      "datasource": {
+        "type": "grafana-postgresql-datasource",
+        "uid": "sofie-postgres"
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "grafana-postgresql-datasource",
+            "uid": "sofie-postgres"
+          },
+          "rawQuery": true,
+          "rawSql": "\nWITH last_solar AS (\n  SELECT ts, solar_kw FROM microgrid_minute WHERE $__timeFilter(ts) AND solar_kw IS NOT NULL ORDER BY ts DESC LIMIT 1\n), last_soc AS (\n  SELECT ts, battery_soc_pct FROM microgrid_minute WHERE $__timeFilter(ts) AND battery_soc_pct IS NOT NULL ORDER BY ts DESC LIMIT 1\n), last_charger AS (\n  SELECT DISTINCT ON (wallbox_id) wallbox_id, ts, power_kw FROM charger_minute WHERE $__timeFilter(ts) ORDER BY wallbox_id, ts DESC\n), last_status AS (\n  SELECT DISTINCT ON (wallbox_id) wallbox_id, ts, status FROM connector_event WHERE ts <= $__timeTo() ORDER BY wallbox_id, ts DESC\n)\nSELECT 'solar' AS kind, 'PV' AS id, 'SOLAR ARRAY' AS label, solar_kw::double precision AS value, ts AS observed_at, NULL::text AS status FROM last_solar\nUNION ALL SELECT 'battery','BATTERY','BATTERY \u00b7 SOC',battery_soc_pct::double precision,ts,NULL FROM last_soc\nUNION ALL SELECT 'hub','HUB','SITE BUS',NULL::double precision,NULL::timestamptz,NULL::text\nUNION ALL SELECT 'charger',w.id,w.id,c.power_kw::double precision,c.ts,s.status FROM wallbox w LEFT JOIN last_charger c ON c.wallbox_id=w.id LEFT JOIN last_status s ON s.wallbox_id=w.id\n",
+          "format": "table"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "color": {
+            "mode": "fixed",
+            "fixedColor": "#6DD6CB"
+          },
+          "noValue": "No measurement",
+          "mappings": [
+            {
+              "type": "special",
+              "options": {
+                "match": "null+nan",
+                "result": {
+                  "text": "No measurement",
+                  "color": "#8E8E8E"
+                }
+              }
+            }
+          ]
+        },
+        "overrides": []
+      },
+      "transparent": true,
+      "options": {
+        "renderer": "canvas",
+        "map": "none",
+        "editorMode": "code",
+        "editor": {
+          "format": "auto"
+        },
+        "getOption": "\nconst frame = context.panel.data.series[0];\nconst fields = Object.fromEntries((frame?.fields || []).map(f => [f.name, f.values?.buffer || f.values || []]));\nconst n = fields.id?.length || 0;\nconst rows = Array.from({length:n}, (_,i) => Object.fromEntries(Object.entries(fields).map(([k,v]) => [k,v[i]])));\nconst dark=context.grafana.theme.isDark;\nconst ink=dark?'#DDE9F4':'#17324A', muted=dark?'#91A4B7':'#50677C', border=dark?'#54708C':'#89A2B9';\nconst colors = {solar:'#F6BE69', battery:'#A8A3FA', hub:'#7D91AB', charger:'#5BE5D5'};\nconst yPositions = [42,102,162,222,282,342,402,462];\nconst chargerRows = rows.filter(r=>r.kind==='charger').sort((a,b)=>a.id.localeCompare(b.id));\nconst nodes = rows.map(r => {\n  const idx = chargerRows.findIndex(c=>c.id===r.id);\n  const x = r.kind==='solar' ? 95 : r.kind==='battery' ? 95 : r.kind==='hub' ? 325 : 555;\n  const y = r.kind==='solar' ? 155 : r.kind==='battery' ? 350 : r.kind==='hub' ? 250 : yPositions[idx];\n  const fresh = r.value !== null && r.value !== undefined;\n  const suffix = r.kind==='battery' ? '%' : r.kind==='hub' ? '' : ' kW';\n  const stat = r.kind==='hub' ? 'configured' : fresh ? Number(r.value).toFixed(1)+suffix : 'no reading';\n  return {id:r.id, name:r.label+'\\n'+stat, x, y, value:r.value, observed_at:r.observed_at, status:r.status,\n    kind:r.kind, symbolSize:r.kind==='hub'?76:r.kind==='charger'?48:67,\n    itemStyle:{color:fresh || r.kind==='hub' ? colors[r.kind] : '#485669', borderColor:'#D8E5F4', borderWidth:1, shadowBlur:18, shadowColor:colors[r.kind]+'66'},\n    label:{show:true, position:r.kind==='hub'?'inside':'right', color:ink,\n      fontSize:r.kind==='charger'?11:12, lineHeight:16, distance:11}};\n});\nconst links = [{source:'PV',target:'HUB'}, {source:'BATTERY',target:'HUB'},\n  ...chargerRows.map(r=>({source:'HUB',target:r.id}))];\ncontext.panel.chart.off('click');\ncontext.panel.chart.on('click', p => {\n  if (p.dataType==='node' && p.data.kind==='charger') {\n    const from=context.grafana.replaceVariables('${__from}');\n    const to=context.grafana.replaceVariables('${__to}');\n    context.grafana.locationService.push('/d/sofie-fleet?from='+encodeURIComponent(from)+'&to='+encodeURIComponent(to)+'&timezone=Europe%2FBerlin&var-wallbox='+encodeURIComponent(p.data.id));\n  }\n});\nreturn {backgroundColor:'transparent', animationDuration:500,\n  tooltip:{trigger:'item',backgroundColor:dark?'#142235':'#FFFFFF',borderColor:border,textStyle:{color:ink},\n    formatter:p=>p.dataType==='edge' ? 'Configured connection \u00b7 flow not measured' :\n    `${p.data.id}<br/>${p.data.value == null ? 'No measurement in range' : Number(p.data.value).toFixed(2)+(p.data.kind==='battery'?'%':' kW')}`+\n    (p.data.status ? `<br/>Last event: ${p.data.status}` : '')+\n    (p.data.observed_at ? `<br/>Measured: ${new Intl.DateTimeFormat('en-GB',{timeZone:'Europe/Berlin',dateStyle:'short',timeStyle:'short'}).format(new Date(p.data.observed_at))}` : '')},\n  series:[{type:'graph',layout:'none',roam:true,data:nodes,links,\n    lineStyle:{color:border,width:1.6,opacity:.85,curveness:.08,type:'dashed'},\n    emphasis:{focus:'adjacency',lineStyle:{width:3}}, edgeSymbol:['none','none']}],\n  graphic:[{type:'text',left:18,top:12,style:{text:'CONFIGURED TOPOLOGY  \u2022  SELECTED WINDOW',fill:muted,font:'11px sans-serif'}},\n    {type:'text',left:18,bottom:10,style:{text:'Select a wallbox for fleet detail. Links show topology, not measured flow.',fill:muted,font:'11px sans-serif'}}]};\n"
+      }
+    },
+    {
+      "id": 3,
+      "title": "PV output",
+      "type": "stat",
+      "gridPos": {
+        "x": 15,
+        "y": 4,
+        "w": 4,
+        "h": 5
+      },
+      "description": "",
+      "datasource": {
+        "type": "grafana-postgresql-datasource",
+        "uid": "sofie-postgres"
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "grafana-postgresql-datasource",
+            "uid": "sofie-postgres"
+          },
+          "rawQuery": true,
+          "rawSql": "SELECT ts AS time,solar_kw AS value FROM microgrid_minute WHERE $__timeFilter(ts) AND solar_kw IS NOT NULL ORDER BY ts",
+          "format": "time_series"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "kwatt",
+          "color": {
+            "mode": "fixed",
+            "fixedColor": "#F6BE69"
+          },
+          "noValue": "No measurement",
+          "mappings": [
+            {
+              "type": "special",
+              "options": {
+                "match": "null+nan",
+                "result": {
+                  "text": "No measurement",
+                  "color": "#8E8E8E"
+                }
+              }
+            }
+          ]
+        },
+        "overrides": []
+      },
+      "options": {
+        "colorMode": "value",
+        "graphMode": "area",
+        "textMode": "auto",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "values": false
+        }
+      }
+    },
+    {
+      "id": 4,
+      "title": "EV charging",
+      "type": "stat",
+      "gridPos": {
+        "x": 19,
+        "y": 4,
+        "w": 5,
+        "h": 5
+      },
+      "description": "",
+      "datasource": {
+        "type": "grafana-postgresql-datasource",
+        "uid": "sofie-postgres"
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "grafana-postgresql-datasource",
+            "uid": "sofie-postgres"
+          },
+          "rawQuery": true,
+          "rawSql": "SELECT ts AS time,SUM(power_kw) AS value FROM charger_minute WHERE $__timeFilter(ts) GROUP BY ts ORDER BY ts",
+          "format": "time_series"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "kwatt",
+          "color": {
+            "mode": "fixed",
+            "fixedColor": "#5BE5D5"
+          },
+          "noValue": "No measurement",
+          "mappings": [
+            {
+              "type": "special",
+              "options": {
+                "match": "null+nan",
+                "result": {
+                  "text": "No measurement",
+                  "color": "#8E8E8E"
+                }
+              }
+            }
+          ]
+        },
+        "overrides": []
+      },
+      "options": {
+        "colorMode": "value",
+        "graphMode": "area",
+        "textMode": "auto",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "values": false
+        }
+      }
+    },
+    {
+      "id": 5,
+      "title": "Battery SoC",
+      "type": "stat",
+      "gridPos": {
+        "x": 15,
+        "y": 9,
+        "w": 4,
+        "h": 5
+      },
+      "description": "",
+      "datasource": {
+        "type": "grafana-postgresql-datasource",
+        "uid": "sofie-postgres"
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "grafana-postgresql-datasource",
+            "uid": "sofie-postgres"
+          },
+          "rawQuery": true,
+          "rawSql": "SELECT ts AS time,battery_soc_pct AS value FROM microgrid_minute WHERE $__timeFilter(ts) AND battery_soc_pct IS NOT NULL ORDER BY ts",
+          "format": "time_series"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "percent",
+          "color": {
+            "mode": "fixed",
+            "fixedColor": "#A8A3FA"
+          },
+          "noValue": "No measurement",
+          "mappings": [
+            {
+              "type": "special",
+              "options": {
+                "match": "null+nan",
+                "result": {
+                  "text": "No measurement",
+                  "color": "#8E8E8E"
+                }
+              }
+            }
+          ]
+        },
+        "overrides": []
+      },
+      "options": {
+        "colorMode": "value",
+        "graphMode": "area",
+        "textMode": "auto",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "values": false
+        }
+      }
+    },
+    {
+      "id": 6,
+      "title": "Wallboxes reporting",
+      "type": "stat",
+      "gridPos": {
+        "x": 19,
+        "y": 9,
+        "w": 5,
+        "h": 5
+      },
+      "description": "Count of reporting wallboxes at the last observed minute; eight are configured.",
+      "datasource": {
+        "type": "grafana-postgresql-datasource",
+        "uid": "sofie-postgres"
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "grafana-postgresql-datasource",
+            "uid": "sofie-postgres"
+          },
+          "rawQuery": true,
+          "rawSql": "SELECT ts AS time,COUNT(*)::double precision AS value FROM charger_minute WHERE $__timeFilter(ts) GROUP BY ts ORDER BY ts",
+          "format": "time_series"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "color": {
+            "mode": "fixed",
+            "fixedColor": "#5BE5D5"
+          },
+          "noValue": "No measurement",
+          "mappings": [
+            {
+              "type": "special",
+              "options": {
+                "match": "null+nan",
+                "result": {
+                  "text": "No measurement",
+                  "color": "#8E8E8E"
+                }
+              }
+            }
+          ]
+        },
+        "overrides": []
+      },
+      "options": {
+        "colorMode": "value",
+        "graphMode": "area",
+        "textMode": "auto",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "values": false
+        }
+      }
+    },
+    {
+      "id": 7,
+      "title": "EV energy \u00b7 window",
+      "type": "stat",
+      "gridPos": {
+        "x": 15,
+        "y": 14,
+        "w": 4,
+        "h": 6
+      },
+      "description": "Integral of recorded minute-level wallbox power. Missing minutes are not estimated.",
+      "datasource": {
+        "type": "grafana-postgresql-datasource",
+        "uid": "sofie-postgres"
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "grafana-postgresql-datasource",
+            "uid": "sofie-postgres"
+          },
+          "rawQuery": true,
+          "rawSql": "SELECT $__timeTo()::timestamptz AS time,(SUM(power_kw)/60.0)::double precision AS value FROM charger_minute WHERE $__timeFilter(ts)",
+          "format": "time_series"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "kWh",
+          "color": {
+            "mode": "fixed",
+            "fixedColor": "#5BE5D5"
+          },
+          "noValue": "No measurement",
+          "mappings": [
+            {
+              "type": "special",
+              "options": {
+                "match": "null+nan",
+                "result": {
+                  "text": "No measurement",
+                  "color": "#8E8E8E"
+                }
+              }
+            }
+          ]
+        },
+        "overrides": []
+      },
+      "options": {
+        "colorMode": "value",
+        "graphMode": "area",
+        "textMode": "auto",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "values": false
+        }
+      }
+    },
+    {
+      "id": 8,
+      "title": "PV peak \u00b7 in window",
+      "type": "stat",
+      "gridPos": {
+        "x": 19,
+        "y": 14,
+        "w": 5,
+        "h": 6
+      },
+      "description": "",
+      "datasource": {
+        "type": "grafana-postgresql-datasource",
+        "uid": "sofie-postgres"
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "grafana-postgresql-datasource",
+            "uid": "sofie-postgres"
+          },
+          "rawQuery": true,
+          "rawSql": "SELECT $__timeTo()::timestamptz AS time,MAX(solar_kw)::double precision AS value FROM microgrid_minute WHERE $__timeFilter(ts)",
+          "format": "time_series"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "kwatt",
+          "color": {
+            "mode": "fixed",
+            "fixedColor": "#F6BE69"
+          },
+          "noValue": "No measurement",
+          "mappings": [
+            {
+              "type": "special",
+              "options": {
+                "match": "null+nan",
+                "result": {
+                  "text": "No measurement",
+                  "color": "#8E8E8E"
+                }
+              }
+            }
+          ]
+        },
+        "overrides": []
+      },
+      "options": {
+        "colorMode": "value",
+        "graphMode": "area",
+        "textMode": "auto",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "values": false
+        }
+      }
+    },
+    {
+      "id": 9,
+      "title": "Generation vs observed charging",
+      "type": "timeseries",
+      "gridPos": {
+        "x": 0,
+        "y": 20,
+        "w": 16,
+        "h": 11
+      },
+      "description": "15-minute averages. Charging covers reporting wallboxes, so the difference is not a site energy balance.",
+      "datasource": {
+        "type": "grafana-postgresql-datasource",
+        "uid": "sofie-postgres"
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "grafana-postgresql-datasource",
+            "uid": "sofie-postgres"
+          },
+          "rawQuery": true,
+          "rawSql": "SELECT $__timeGroupAlias(ts,'15m'),AVG(solar_kw) AS \"PV output\" FROM microgrid_minute WHERE $__timeFilter(ts) AND solar_kw IS NOT NULL GROUP BY 1 ORDER BY 1",
+          "format": "time_series"
+        },
+        {
+          "refId": "B",
+          "datasource": {
+            "type": "grafana-postgresql-datasource",
+            "uid": "sofie-postgres"
+          },
+          "rawQuery": true,
+          "rawSql": "SELECT $__timeGroupAlias(ts,'15m'),AVG(total_kw) AS \"Observed EV charging\" FROM (SELECT ts,SUM(power_kw) AS total_kw FROM charger_minute WHERE $__timeFilter(ts) GROUP BY ts) s GROUP BY 1 ORDER BY 1",
+          "format": "time_series"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "kwatt",
+          "color": {
+            "mode": "fixed",
+            "fixedColor": "#F6BE69"
+          },
+          "noValue": "No measurement",
+          "mappings": [
+            {
+              "type": "special",
+              "options": {
+                "match": "null+nan",
+                "result": {
+                  "text": "No measurement",
+                  "color": "#8E8E8E"
+                }
+              }
+            }
+          ],
+          "custom": {
+            "drawStyle": "line",
+            "lineWidth": 2,
+            "fillOpacity": 12,
+            "showPoints": "never",
+            "spanNulls": false
+          }
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Observed EV charging"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "#5BE5D5"
+                }
+              }
+            ]
+          }
+        ]
+      },
+      "options": {
+        "legend": {
+          "showLegend": true,
+          "displayMode": "list",
+          "placement": "bottom"
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        }
+      }
+    },
+    {
+      "id": 10,
+      "title": "Battery state of charge",
+      "type": "timeseries",
+      "gridPos": {
+        "x": 16,
+        "y": 20,
+        "w": 8,
+        "h": 11
+      },
+      "description": "",
+      "datasource": {
+        "type": "grafana-postgresql-datasource",
+        "uid": "sofie-postgres"
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "grafana-postgresql-datasource",
+            "uid": "sofie-postgres"
+          },
+          "rawQuery": true,
+          "rawSql": "SELECT $__timeGroupAlias(ts,'15m'),AVG(battery_soc_pct) AS \"Battery SoC\" FROM microgrid_minute WHERE $__timeFilter(ts) AND battery_soc_pct IS NOT NULL GROUP BY 1 ORDER BY 1",
+          "format": "time_series"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "percent",
+          "color": {
+            "mode": "fixed",
+            "fixedColor": "#A8A3FA"
+          },
+          "noValue": "No measurement",
+          "mappings": [
+            {
+              "type": "special",
+              "options": {
+                "match": "null+nan",
+                "result": {
+                  "text": "No measurement",
+                  "color": "#8E8E8E"
+                }
+              }
+            }
+          ],
+          "custom": {
+            "drawStyle": "line",
+            "lineWidth": 2,
+            "fillOpacity": 12,
+            "showPoints": "never",
+            "spanNulls": false
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "legend": {
+          "showLegend": true,
+          "displayMode": "list",
+          "placement": "bottom"
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        }
+      }
+    },
+    {
+      "id": 11,
+      "title": "Wallbox power \u00b7 activity heatmap",
+      "type": "volkovlabs-echarts-panel",
+      "gridPos": {
+        "x": 0,
+        "y": 31,
+        "w": 16,
+        "h": 13
+      },
+      "description": "Mean power in adaptive time bins where a wallbox reported. Blank cells mean no source measurement, not zero load.",
+      "datasource": {
+        "type": "grafana-postgresql-datasource",
+        "uid": "sofie-postgres"
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "grafana-postgresql-datasource",
+            "uid": "sofie-postgres"
+          },
+          "rawQuery": true,
+          "rawSql": "SELECT date_bin(CASE WHEN $__timeTo()::timestamptz - $__timeFrom()::timestamptz > interval '30 days' THEN interval '1 day' WHEN $__timeTo()::timestamptz - $__timeFrom()::timestamptz > interval '2 days' THEN interval '1 hour' ELSE interval '15 minutes' END,ts,'2025-01-01'::timestamptz) AS bucket, wallbox_id,\n    AVG(power_kw)::double precision AS avg_kw FROM charger_minute\n    WHERE $__timeFilter(ts)  GROUP BY 1,2 ORDER BY 1,2 LIMIT 8000",
+          "format": "table"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "color": {
+            "mode": "fixed",
+            "fixedColor": "#6DD6CB"
+          },
+          "noValue": "No measurement",
+          "mappings": [
+            {
+              "type": "special",
+              "options": {
+                "match": "null+nan",
+                "result": {
+                  "text": "No measurement",
+                  "color": "#8E8E8E"
+                }
+              }
+            }
+          ]
+        },
+        "overrides": []
+      },
+      "transparent": true,
+      "options": {
+        "renderer": "canvas",
+        "map": "none",
+        "editorMode": "code",
+        "editor": {
+          "format": "auto"
+        },
+        "getOption": "\nconst frame=context.panel.data.series[0];\nconst f=Object.fromEntries((frame?.fields||[]).map(x=>[x.name,x.values?.buffer||x.values||[]]));\nconst dark=context.grafana.theme.isDark;\nconst ink=dark?'#DDE9F4':'#17324A', muted=dark?'#91A4B7':'#50677C', border=dark?'#54708C':'#89A2B9';\nconst n=f.wallbox_id?.length||0;\nconst rows=Array.from({length:n},(_,i)=>({time:new Date(f.bucket[i]).getTime(),box:String(f.wallbox_id[i]),kw:Number(f.avg_kw[i])}));\nconst times=[...new Set(rows.map(r=>r.time))].sort((a,b)=>a-b);\nconst boxes=[...new Set(rows.map(r=>r.box))].sort();\nconst max=Math.max(1,...rows.map(r=>r.kw));\nconst data=rows.map(r=>[times.indexOf(r.time),boxes.indexOf(r.box),r.kw]);\nreturn {backgroundColor:'transparent',animationDuration:350,\n  grid:{left:62,right:28,top:20,bottom:68},\n  tooltip:{position:'top',backgroundColor:dark?'#142235':'#FFFFFF',borderColor:border,textStyle:{color:ink},\n    formatter:p=>`${boxes[p.data[1]]}<br/>${new Intl.DateTimeFormat('en-GB',{timeZone:'Europe/Berlin',dateStyle:'short',timeStyle:'short'}).format(new Date(times[p.data[0]]))}<br/><b>${p.data[2].toFixed(2)} kW average</b>`},\n  xAxis:{type:'category',data:times.map(t=>new Intl.DateTimeFormat('en-GB',{timeZone:'Europe/Berlin',day:'2-digit',month:'short',hour:'2-digit',minute:'2-digit'}).format(new Date(t))),\n    axisLabel:{color:muted,interval:Math.max(0,Math.floor(times.length/8)-1),rotate:0},axisLine:{lineStyle:{color:border}},splitArea:{show:false}},\n  yAxis:{type:'category',data:boxes,axisLabel:{color:ink},axisLine:{lineStyle:{color:border}}},\n  visualMap:{min:0,max,calculable:false,orient:'horizontal',left:'center',bottom:0,\n    text:['HIGH','LOW'],textStyle:{color:muted},inRange:{color:['#183344','#245F70','#40B9B0','#F6BE69']}},\n  series:[{type:'heatmap',data,itemStyle:{borderColor:dark?'#142235':'#FFFFFF',borderWidth:1},emphasis:{itemStyle:{borderColor:'#FFFFFF',borderWidth:1}}}]};\n"
+      }
+    },
+    {
+      "id": 12,
+      "title": "Reporting coverage \u00b7 8 configured",
+      "type": "timeseries",
+      "gridPos": {
+        "x": 16,
+        "y": 31,
+        "w": 8,
+        "h": 13
+      },
+      "description": "",
+      "datasource": {
+        "type": "grafana-postgresql-datasource",
+        "uid": "sofie-postgres"
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "grafana-postgresql-datasource",
+            "uid": "sofie-postgres"
+          },
+          "rawQuery": true,
+          "rawSql": "SELECT $__timeGroupAlias(ts,'15m'),AVG(reporting)::double precision AS \"Reporting wallboxes\" FROM (SELECT m.ts,COUNT(c.wallbox_id) AS reporting FROM microgrid_minute m LEFT JOIN charger_minute c ON c.ts=m.ts WHERE $__timeFilter(m.ts) GROUP BY m.ts) s GROUP BY 1 ORDER BY 1",
+          "format": "time_series"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "color": {
+            "mode": "fixed",
+            "fixedColor": "#5BE5D5"
+          },
+          "noValue": "No measurement",
+          "mappings": [
+            {
+              "type": "special",
+              "options": {
+                "match": "null+nan",
+                "result": {
+                  "text": "No measurement",
+                  "color": "#8E8E8E"
+                }
+              }
+            }
+          ],
+          "custom": {
+            "drawStyle": "line",
+            "lineWidth": 2,
+            "fillOpacity": 12,
+            "showPoints": "never",
+            "spanNulls": false
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "legend": {
+          "showLegend": true,
+          "displayMode": "list",
+          "placement": "bottom"
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        }
+      }
+    },
+    {
+      "id": 13,
+      "title": "Wallbox snapshot \u00b7 power and event age",
+      "type": "table",
+      "gridPos": {
+        "x": 0,
+        "y": 44,
+        "w": 15,
+        "h": 10
+      },
+      "description": "Power must be observed in the selected window. Event age makes stale source status visible.",
+      "datasource": {
+        "type": "grafana-postgresql-datasource",
+        "uid": "sofie-postgres"
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "grafana-postgresql-datasource",
+            "uid": "sofie-postgres"
+          },
+          "rawQuery": true,
+          "rawSql": "SELECT w.id AS \"Wallbox\",ROUND(c.power_kw::numeric,2) AS \"Power kW\",c.ts AS \"Power at\",COALESCE(e.status,'Unknown') AS \"Last event\",e.ts AS \"Event at\",ROUND((EXTRACT(EPOCH FROM ($__timeTo() - e.ts))/60)::numeric,0) AS \"Event age min\" FROM wallbox w LEFT JOIN LATERAL (SELECT ts,power_kw FROM charger_minute WHERE wallbox_id=w.id AND $__timeFilter(ts) ORDER BY ts DESC LIMIT 1) c ON TRUE LEFT JOIN LATERAL (SELECT ts,status FROM connector_event WHERE wallbox_id=w.id AND ts <= $__timeTo() ORDER BY ts DESC LIMIT 1) e ON TRUE ORDER BY w.id",
+          "format": "table"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "color": {
+            "mode": "fixed",
+            "fixedColor": "#6DD6CB"
+          },
+          "noValue": "No measurement",
+          "mappings": [
+            {
+              "type": "special",
+              "options": {
+                "match": "null+nan",
+                "result": {
+                  "text": "No measurement",
+                  "color": "#8E8E8E"
+                }
+              }
+            }
+          ]
+        },
+        "overrides": []
+      },
+      "options": {
+        "showHeader": true,
+        "cellHeight": "sm"
+      }
+    },
+    {
+      "id": 14,
+      "title": "Fault and error evidence",
+      "type": "table",
+      "gridPos": {
+        "x": 15,
+        "y": 44,
+        "w": 9,
+        "h": 10
+      },
+      "description": "No rows means no fault/error event recorded in the selected range.",
+      "datasource": {
+        "type": "grafana-postgresql-datasource",
+        "uid": "sofie-postgres"
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "grafana-postgresql-datasource",
+            "uid": "sofie-postgres"
+          },
+          "rawQuery": true,
+          "rawSql": "SELECT ts AS \"Recorded at\",wallbox_id AS \"Wallbox\",status AS \"Status\",error_code AS \"Error\" FROM connector_event WHERE $__timeFilter(ts) AND (status='Faulted' OR (error_code IS NOT NULL AND error_code <> 'NoError')) ORDER BY ts DESC LIMIT 100",
+          "format": "table"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "color": {
+            "mode": "fixed",
+            "fixedColor": "#6DD6CB"
+          },
+          "noValue": "No measurement",
+          "mappings": [
+            {
+              "type": "special",
+              "options": {
+                "match": "null+nan",
+                "result": {
+                  "text": "No measurement",
+                  "color": "#8E8E8E"
+                }
+              }
+            }
+          ]
+        },
+        "overrides": []
+      },
+      "options": {
+        "showHeader": true,
+        "cellHeight": "sm"
+      }
+    },
+    {
+      "id": 15,
+      "title": "INTERPRETATION",
+      "type": "text",
+      "gridPos": {
+        "x": 0,
+        "y": 54,
+        "w": 24,
+        "h": 4
+      },
+      "description": "",
+      "options": {
+        "mode": "markdown",
+        "content": "### Evidence boundaries\n**Measured:** PV output, battery SoC, wallbox power, connector events and charging transactions. **Partial:** EV load covers reporting wallboxes. **Unavailable:** measured inverter flow, other loads, full energy balance, forecast and live control. Use the Fleet and Data Trust dashboards for diagnosis."
+      }
+    }
+  ],
+  "annotations": {
+    "list": [
+      {
+        "builtIn": 1,
+        "datasource": {
+          "type": "grafana",
+          "uid": "-- Grafana --"
+        },
+        "enable": true,
+        "hide": true,
+        "name": "Annotations & Alerts",
+        "type": "dashboard"
+      }
+    ]
+  }
+}
